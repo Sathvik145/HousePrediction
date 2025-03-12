@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Price Prediction</title>
+    <style>
+        body {
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .title {
+            font-size: 30px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 30px;
+            text-align: center;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        .container {
+            display: flex;
+            gap: 40px;
+            width: 85%;
+        }
+        .info-box, .predict-box {
+            flex: 1;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+        .info-box {
+            background: linear-gradient(to bottom right, #007bff, #00c6ff);
+        }
+        .predict-box {
+            background: linear-gradient(to bottom right, #0056b3, #0099ff);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        p {
+            line-height: 1.6;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input {
+            width: 85%;
+            padding: 10px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            width: 110px;
+            padding: 12px;
+            background: #004085;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:hover {
+            background: #002752;
+        }
+        #prediction-result {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            text-align: center;
+            font-size: 18px;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+    <script>
+        function validateInput(input, min, max) {
+            let value = parseFloat(input.value);
+            if (value < min || value > max) {
+                alert(`Value out of range! Please enter between ${min} and ${max}.`);
+                input.value = "";
+            }
+        }
+
+        function predictPrice(event) {
+            event.preventDefault();
+            let formData = new FormData(document.getElementById("prediction-form"));
+
+            fetch("/predict", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert("Error: " + data.error);
+                } else {
+                    document.getElementById("prediction-result").style.display = "block";
+                    document.getElementById("prediction-result").innerText = "Predicted Price: $" + data.prediction + "K";
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+</head>
+<body>
+    <div class="title">House Price Prediction</div>
+    <div class="container">
+        <div class="info-box">
+            <h2>About House Price Prediction</h2>
+            <p>House price prediction uses machine learning to estimate home values based on factors like income, location, and house features. This helps buyers and sellers make informed decisions.</p>
+            <h2>Dataset Information</h2>
+            <p>We used the California Housing Dataset, containing 20,640 rows and 8 key features like median income, house age, and room details.</p>
+            <h2>Model Used</h2>
+            <p>Our model is a tuned Gradient Boosting Regressor, selected for its ability to capture complex patterns and ensure high accuracy.</p>
+        </div>
+        <div class="predict-box">
+            <h2>Predict House Price</h2>
+            <form id="prediction-form" onsubmit="predictPrice(event)">
+                <input type="text" name="MedInc" placeholder="Median Income (0.5 - 15)" onblur="validateInput(this, 0.5, 15)">
+                <input type="text" name="HouseAge" placeholder="House Age (1 - 50)" onblur="validateInput(this, 1, 50)">
+                <input type="text" name="AveRooms" placeholder="Avg Rooms (1 - 10)" onblur="validateInput(this, 1, 10)">
+                <input type="text" name="AveBedrms" placeholder="Avg Bedrooms (1 - 5)" onblur="validateInput(this, 1, 5)">
+                <input type="text" name="Population" placeholder="Population (100 - 40000)" onblur="validateInput(this, 100, 40000)">
+                <input type="text" name="AveOccup" placeholder="Avg Occupancy (1 - 10)" onblur="validateInput(this, 1, 10)">
+                <input type="text" name="Latitude" placeholder="Latitude (32 - 42)" onblur="validateInput(this, 32, 42)">
+                <input type="text" name="Longitude" placeholder="Longitude (-125 - -114)" onblur="validateInput(this, -125, -114)">
+                <button type="submit">Predict</button>
+            </form>
+            <div id="prediction-result"></div>
+        </div>
+    </div>
+</body>
+</html>
